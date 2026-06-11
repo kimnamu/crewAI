@@ -21,6 +21,56 @@ from crewai_cli.utils import (
 )
 
 
+def train_crew(*args: Any, **kwargs: Any) -> Any:
+    from crewai_cli.train_crew import train_crew as _train_crew
+
+    return _train_crew(*args, **kwargs)
+
+
+def evaluate_crew(*args: Any, **kwargs: Any) -> Any:
+    from crewai_cli.evaluate_crew import evaluate_crew as _evaluate_crew
+
+    return _evaluate_crew(*args, **kwargs)
+
+
+def replay_task_command(*args: Any, **kwargs: Any) -> Any:
+    from crewai_cli.replay_from_task import replay_task_command as _replay_task_command
+
+    return _replay_task_command(*args, **kwargs)
+
+
+class AuthenticationCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        from crewai_cli.authentication.main import (
+            AuthenticationCommand as _AuthenticationCommand,
+        )
+
+        return _AuthenticationCommand(*args, **kwargs)
+
+
+class DeployCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        from crewai_cli.deploy.main import DeployCommand as _DeployCommand
+
+        return _DeployCommand(*args, **kwargs)
+
+
+class TemplateCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        from crewai_cli.remote_template.main import TemplateCommand as _TemplateCommand
+
+        return _TemplateCommand(*args, **kwargs)
+
+
+class OrganizationCommand:
+    def __new__(cls, *args: Any, **kwargs: Any) -> Any:
+        from crewai_cli.organization.main import (
+            OrganizationCommand as _OrganizationCommand,
+        )
+
+        return _OrganizationCommand(*args, **kwargs)
+
+
 def _get_cli_version() -> str:
     """Return the best available version string for the CLI."""
     try:
@@ -71,13 +121,23 @@ def uv(uv_args: tuple[str, ...]) -> None:
 
 
 @crewai.command()
-@click.argument("type", required=False, default=None, type=click.Choice(["crew", "flow"]))
+@click.argument(
+    "type", required=False, default=None, type=click.Choice(["crew", "flow"])
+)
 @click.argument("name", required=False, default=None)
 @click.option("--provider", type=str, help="The provider to use for the crew")
 @click.option("--skip_provider", is_flag=True, help="Skip provider validation")
-@click.option("--classic", is_flag=True, help="Use classic Python/YAML project structure instead of JSON")
+@click.option(
+    "--classic",
+    is_flag=True,
+    help="Use classic Python/YAML project structure instead of JSON",
+)
 def create(
-    type: str | None, name: str | None, provider: str | None, skip_provider: bool = False, classic: bool = False
+    type: str | None,
+    name: str | None,
+    provider: str | None,
+    skip_provider: bool = False,
+    classic: bool = False,
 ) -> None:
     """Create a new crew, or flow."""
     if not type:
@@ -85,7 +145,10 @@ def create(
 
         options = [
             ("crew", "A team of AI agents working together"),
-            ("flow", "A deterministic workflow with full control over agents and crews"),
+            (
+                "flow",
+                "A deterministic workflow with full control over agents and crews",
+            ),
         ]
         type = pick("What would you like to create?", options)
         if type is None:
@@ -100,12 +163,15 @@ def create(
     if type == "crew":
         if classic:
             from crewai_cli.create_crew import create_crew
+
             create_crew(name, provider, skip_provider)
         else:
             from crewai_cli.create_json_crew import create_json_crew
+
             create_json_crew(name, provider, skip_provider)
     elif type == "flow":
         from crewai_cli.create_flow import create_flow
+
         create_flow(name)
     else:
         click.secho("Error: Invalid type. Must be 'crew' or 'flow'.", fg="red")
@@ -148,7 +214,6 @@ def version(tools: bool) -> None:
 )
 def train(n_iterations: int, filename: str) -> None:
     """Train the crew."""
-    from crewai_cli.train_crew import train_crew
     click.echo(f"Training the Crew for {n_iterations} iterations")
     train_crew(n_iterations, filename)
 
@@ -181,7 +246,6 @@ def replay(task_id: str, trained_agents_file: str | None) -> None:
         trained_agents_file: Optional trained-agents pickle path.
     """
     try:
-        from crewai_cli.replay_from_task import replay_task_command
         click.echo(f"Replaying the crew from task {task_id}")
         replay_task_command(task_id, trained_agents_file=trained_agents_file)
     except Exception as e:
@@ -193,6 +257,7 @@ def log_tasks_outputs() -> None:
     """Retrieve your latest crew.kickoff() task outputs."""
     try:
         from crewai_cli.task_outputs import load_task_outputs
+
         tasks = load_task_outputs()
 
         if not tasks:
@@ -282,6 +347,7 @@ def reset_memories(
             )
             return
         from crewai_cli.reset_memories_command import reset_memories_command
+
         reset_memories_command(memory, knowledge, agent_knowledge, kickoff_outputs, all)
     except Exception as e:
         click.echo(f"An error occurred while resetting memories: {e}", err=True)
@@ -378,7 +444,6 @@ def memory(
 def test(n_iterations: int, model: str, trained_agents_file: str | None) -> None:
     """Test the crew and evaluate the results."""
     click.echo(f"Testing the crew for {n_iterations} iterations with model {model}")
-    from crewai_cli.evaluate_crew import evaluate_crew
     evaluate_crew(n_iterations, model, trained_agents_file=trained_agents_file)
 
 
@@ -392,6 +457,7 @@ def test(n_iterations: int, model: str, trained_agents_file: str | None) -> None
 def install(context: click.Context) -> None:
     """Install the Crew."""
     from crewai_cli.install_crew import install_crew
+
     install_crew(context.args)
 
 
@@ -419,6 +485,7 @@ def install(context: click.Context) -> None:
 def run(trained_agents_file: str | None, daemon: bool = False) -> None:
     """Run the Crew."""
     from crewai_cli.run_crew import run_crew
+
     run_crew(trained_agents_file=trained_agents_file, daemon=daemon)
 
 
@@ -426,13 +493,13 @@ def run(trained_agents_file: str | None, daemon: bool = False) -> None:
 def update() -> None:
     """Update the pyproject.toml of the Crew project to use uv."""
     from crewai_cli.update_crew import update_crew
+
     update_crew()
 
 
 @crewai.command()
 def login() -> None:
     """Sign Up/Login to CrewAI AMP."""
-    from crewai_cli.authentication.main import AuthenticationCommand
     Settings().clear_user_settings()
     AuthenticationCommand().login()
 
@@ -467,7 +534,6 @@ def deploy() -> None:
 )
 def deploy_create(yes: bool, skip_validate: bool) -> None:
     """Create a Crew deployment."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.create_crew(yes, skip_validate=skip_validate)
 
@@ -475,7 +541,6 @@ def deploy_create(yes: bool, skip_validate: bool) -> None:
 @deploy.command(name="list")
 def deploy_list() -> None:
     """List all deployments."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.list_crews()
 
@@ -489,7 +554,6 @@ def deploy_list() -> None:
 )
 def deploy_push(uuid: str | None, skip_validate: bool) -> None:
     """Deploy the Crew."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.deploy(uuid=uuid, skip_validate=skip_validate)
 
@@ -511,7 +575,6 @@ def deploy_validate() -> None:
 @click.option("-u", "--uuid", type=str, help="Crew UUID parameter")
 def deply_status(uuid: str | None) -> None:
     """Get the status of a deployment."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.get_crew_status(uuid=uuid)
 
@@ -520,7 +583,6 @@ def deply_status(uuid: str | None) -> None:
 @click.option("-u", "--uuid", type=str, help="Crew UUID parameter")
 def deploy_logs(uuid: str | None) -> None:
     """Get the logs of a deployment."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.get_crew_logs(uuid=uuid)
 
@@ -529,7 +591,6 @@ def deploy_logs(uuid: str | None) -> None:
 @click.option("-u", "--uuid", type=str, help="Crew UUID parameter")
 def deploy_remove(uuid: str | None) -> None:
     """Remove a deployment."""
-    from crewai_cli.deploy.main import DeployCommand
     deploy_cmd = DeployCommand()
     deploy_cmd.remove_crew(uuid=uuid)
 
@@ -543,6 +604,7 @@ def tool() -> None:
 @click.argument("handle")
 def tool_create(handle: str) -> None:
     from crewai_cli.tools.main import ToolCommand
+
     tool_cmd = ToolCommand()
     tool_cmd.create(handle)
 
@@ -551,6 +613,7 @@ def tool_create(handle: str) -> None:
 @click.argument("handle")
 def tool_install(handle: str) -> None:
     from crewai_cli.tools.main import ToolCommand
+
     tool_cmd = ToolCommand()
     tool_cmd.login()
     tool_cmd.install(handle)
@@ -568,6 +631,7 @@ def tool_install(handle: str) -> None:
 @click.option("--private", "is_public", flag_value=False)
 def tool_publish(is_public: bool, force: bool) -> None:
     from crewai_cli.tools.main import ToolCommand
+
     tool_cmd = ToolCommand()
     tool_cmd.login()
     tool_cmd.publish(is_public, force)
@@ -650,7 +714,6 @@ def template() -> None:
 @template.command(name="list")
 def template_list() -> None:
     """List available templates and select one to install."""
-    from crewai_cli.remote_template.main import TemplateCommand
     template_cmd = TemplateCommand()
     template_cmd.list_templates()
 
@@ -666,7 +729,6 @@ def template_list() -> None:
 )
 def template_add(name: str, output_dir: str | None) -> None:
     """Add a template to the current directory."""
-    from crewai_cli.remote_template.main import TemplateCommand
     template_cmd = TemplateCommand()
     template_cmd.add_template(name, output_dir)
 
@@ -680,6 +742,7 @@ def flow() -> None:
 def flow_run() -> None:
     """Kickoff the Flow."""
     from crewai_cli.kickoff_flow import kickoff_flow
+
     click.echo("Running the Flow")
     kickoff_flow()
 
@@ -688,6 +751,7 @@ def flow_run() -> None:
 def flow_plot() -> None:
     """Plot the Flow."""
     from crewai_cli.plot_flow import plot_flow
+
     click.echo("Plotting the Flow")
     plot_flow()
 
@@ -697,6 +761,7 @@ def flow_plot() -> None:
 def flow_add_crew(crew_name: str) -> None:
     """Add a crew to an existing flow."""
     from crewai_cli.add_crew_to_flow import add_crew_to_flow
+
     click.echo(f"Adding crew {crew_name} to the flow")
     add_crew_to_flow(crew_name)
 
@@ -710,6 +775,7 @@ def triggers() -> None:
 def triggers_list() -> None:
     """List all available triggers from integrations."""
     from crewai_cli.triggers.main import TriggersCommand
+
     triggers_cmd = TriggersCommand()
     triggers_cmd.list_triggers()
 
@@ -719,6 +785,7 @@ def triggers_list() -> None:
 def triggers_run(trigger_path: str) -> None:
     """Execute crew with trigger payload. Format: app_slug/trigger_slug"""
     from crewai_cli.triggers.main import TriggersCommand
+
     triggers_cmd = TriggersCommand()
     triggers_cmd.execute_with_trigger(trigger_path)
 
@@ -732,6 +799,7 @@ def chat() -> None:
         "\nStarting a conversation with the Crew\nType 'exit' or Ctrl+C to quit.\n",
     )
     from crewai_cli.crew_chat import run_chat
+
     run_chat()
 
 
@@ -743,7 +811,6 @@ def org() -> None:
 @org.command("list")
 def org_list() -> None:
     """List available organizations."""
-    from crewai_cli.organization.main import OrganizationCommand
     org_command = OrganizationCommand()
     org_command.list()
 
@@ -752,7 +819,6 @@ def org_list() -> None:
 @click.argument("id")
 def switch(id: str) -> None:
     """Switch to a specific organization."""
-    from crewai_cli.organization.main import OrganizationCommand
     org_command = OrganizationCommand()
     org_command.switch(id)
 
@@ -760,7 +826,6 @@ def switch(id: str) -> None:
 @org.command()
 def current() -> None:
     """Show current organization when 'crewai org' is called without subcommands."""
-    from crewai_cli.organization.main import OrganizationCommand
     org_command = OrganizationCommand()
     org_command.current()
 
@@ -775,6 +840,7 @@ def enterprise() -> None:
 def enterprise_configure(enterprise_url: str) -> None:
     """Configure CrewAI AMP OAuth2 settings from the provided Enterprise URL."""
     from crewai_cli.enterprise.main import EnterpriseConfigureCommand
+
     enterprise_command = EnterpriseConfigureCommand()
     enterprise_command.configure(enterprise_url)
 
@@ -788,6 +854,7 @@ def config() -> None:
 def config_list() -> None:
     """List all CLI configuration parameters."""
     from crewai_cli.settings.main import SettingsCommand
+
     config_command = SettingsCommand()
     config_command.list()
 
@@ -798,6 +865,7 @@ def config_list() -> None:
 def config_set(key: str, value: str) -> None:
     """Set a CLI configuration parameter."""
     from crewai_cli.settings.main import SettingsCommand
+
     config_command = SettingsCommand()
     config_command.set(key, value)
 
@@ -806,6 +874,7 @@ def config_set(key: str, value: str) -> None:
 def config_reset() -> None:
     """Reset all CLI configuration parameters to default values."""
     from crewai_cli.settings.main import SettingsCommand
+
     config_command = SettingsCommand()
     config_command.reset_all_settings()
 
