@@ -483,18 +483,11 @@ def install(context: click.Context) -> None:
         "CREWAI_TRAINED_AGENTS_FILE."
     ),
 )
-@click.option(
-    "-d",
-    "--daemon",
-    is_flag=True,
-    default=False,
-    help="Run without the TUI — plain console output. Useful for background jobs, CI, and scripting.",
-)
-def run(trained_agents_file: str | None, daemon: bool = False) -> None:
+def run(trained_agents_file: str | None) -> None:
     """Run the Crew."""
     from crewai_cli.run_crew import run_crew
 
-    run_crew(trained_agents_file=trained_agents_file, daemon=daemon)
+    run_crew(trained_agents_file=trained_agents_file)
 
 
 @crewai.command()
